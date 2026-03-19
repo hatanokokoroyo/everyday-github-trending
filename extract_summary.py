@@ -10,9 +10,6 @@ from urllib.request import Request, urlopen
 from open_ai_api import translate_project_description
 
 
-DEFAULT_WEBHOOK = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ef7b7153-c23c-4158-afb8-5edb69a85a51"
-
-
 def read_json(path):
     with open(path, "r", encoding="utf-8") as handle:
         return json.load(handle)
@@ -122,8 +119,12 @@ def send_wecom(webhook, content):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", default="trending_top5.json")
-    parser.add_argument("--webhook", default=os.getenv("WEIXIN_WEBHOOK", DEFAULT_WEBHOOK))
+    parser.add_argument("--webhook", default=os.getenv("WEIXIN_WEBHOOK"))
     args = parser.parse_args()
+
+    if not args.webhook:
+        print("发送失败: 请先在环境变量 WEIXIN_WEBHOOK 中配置企业微信 webhook", file=sys.stderr)
+        raise SystemExit(1)
 
     try:
         data = read_json(args.input)
